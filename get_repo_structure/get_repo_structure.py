@@ -8,21 +8,6 @@ import uuid
 import pandas as pd
 from tqdm import tqdm
 
-repo_to_top_folder = {
-    "django/django": "django",
-    "sphinx-doc/sphinx": "sphinx",
-    "scikit-learn/scikit-learn": "scikit-learn",
-    "sympy/sympy": "sympy",
-    "pytest-dev/pytest": "pytest",
-    "matplotlib/matplotlib": "matplotlib",
-    "astropy/astropy": "astropy",
-    "pydata/xarray": "xarray",
-    "mwaskom/seaborn": "seaborn",
-    "psf/requests": "requests",
-    "pylint-dev/pylint": "pylint",
-    "pallets/flask": "flask",
-}
-
 
 def checkout_commit(repo_path, commit_id):
     """Checkout the specified commit in the given local git repository.
@@ -41,19 +26,12 @@ def checkout_commit(repo_path, commit_id):
         print(f"An unexpected error occurred: {e}")
 
 
-def clone_repo(repo_name, repo_playground):
+def clone_repo(repo_name, repo_dir_name, repo_playground):
     try:
-
-        print(
-            f"Cloning repository from https://github.com/{repo_name}.git to {repo_playground}/{repo_to_top_folder[repo_name]}..."
-        )
+        target = os.path.join(repo_playground, repo_dir_name)
+        print(f"Cloning repository from https://github.com/{repo_name}.git to {target}...")
         subprocess.run(
-            [
-                "git",
-                "clone",
-                f"https://github.com/{repo_name}.git",
-                f"{repo_playground}/{repo_to_top_folder[repo_name]}",
-            ],
+            ["git", "clone", f"https://github.com/{repo_name}.git", target],
             check=True,
         )
         print("Repository cloned successfully.")
@@ -66,8 +44,9 @@ def clone_repo(repo_name, repo_playground):
 def get_project_structure_from_scratch(
     repo_name, commit_id, instance_id, repo_playground
 ):
+    repo_dir_name = repo_name.replace("/", "__")
 
-    # Generate a temperary folder and add uuid to avoid collision
+    # Generate a temporary folder and add uuid to avoid collision
     repo_playground = os.path.join(repo_playground, str(uuid.uuid4()))
 
     # assert playground doesn't exist
@@ -76,13 +55,12 @@ def get_project_structure_from_scratch(
     # create playground
     os.makedirs(repo_playground)
 
-    clone_repo(repo_name, repo_playground)
-    checkout_commit(f"{repo_playground}/{repo_to_top_folder[repo_name]}", commit_id)
-    structure = create_structure(f"{repo_playground}/{repo_to_top_folder[repo_name]}")
+    repo_path = os.path.join(repo_playground, repo_dir_name)
+    clone_repo(repo_name, repo_dir_name, repo_playground)
+    checkout_commit(repo_path, commit_id)
+    structure = create_structure(repo_path)
     # clean up
-    subprocess.run(
-        ["rm", "-rf", f"{repo_playground}/{repo_to_top_folder[repo_name]}"], check=True
-    )
+    subprocess.run(["rm", "-rf", repo_path], check=True)
     d = {
         "repo": repo_name,
         "base_commit": commit_id,

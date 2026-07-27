@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agentless"
+version = "0.1.0"
+description = "Agentless: An LLM-based automated bug-fixing approach (Qwen-adapted fork)"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+dependencies = [
+    "openai",
+    "anthropic",
+    "datasets",
+    "tiktoken",
+    "libcst",
+    "llama-index",
+    "jsonlines",
+    "pandas",
+    "tqdm",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pre-commit",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["agentless*", "get_repo_structure*"]
+exclude = ["classification*", "dev*", "resources*", "tests*"]

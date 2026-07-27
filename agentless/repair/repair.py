@@ -5,7 +5,7 @@ import os
 from difflib import unified_diff
 from threading import Lock
 
-from datasets import load_dataset
+from datasets import load_from_disk
 from tqdm import tqdm
 
 from agentless.util.api_requests import num_tokens_from_messages
@@ -535,7 +535,7 @@ def repair(args):
     with open(f"{args.output_folder}/args.json", "w") as f:
         json.dump(vars(args), f, indent=4)
 
-    swe_bench_data = load_dataset(args.dataset, split="test")
+    swe_bench_data = load_from_disk(args.dataset)[args.split]
     locs = load_jsonl(args.loc_file)
     prev_o = load_jsonl(args.output_file) if os.path.exists(args.output_file) else []
 
@@ -747,12 +747,6 @@ def main():
         "--model",
         type=str,
         default="gpt-4o-2024-05-13",
-        choices=[
-            "gpt-4o-2024-05-13",
-            "deepseek-coder",
-            "gpt-4o-mini-2024-07-18",
-            "claude-3-5-sonnet-20241022",
-        ],
     )
     parser.add_argument(
         "--backend",
@@ -783,7 +777,13 @@ def main():
         "--dataset",
         type=str,
         default="princeton-nlp/SWE-bench_Lite",
-        choices=["princeton-nlp/SWE-bench_Lite", "princeton-nlp/SWE-bench_Verified"],
+        help="Dataset path or HuggingFace name",
+    )
+    parser.add_argument(
+        "--split",
+        type=str,
+        default="test",
+        help="Dataset split: test or dev",
     )
 
     args = parser.parse_args()

@@ -4,7 +4,7 @@ import json
 import os
 from threading import Lock
 
-from datasets import load_dataset
+from datasets import load_from_disk
 from tqdm import tqdm
 
 from agentless.fl.FL import LLMFL
@@ -396,7 +396,7 @@ def localize_instance(
 
 
 def localize_irrelevant(args):
-    swe_bench_data = load_dataset(args.dataset, split="test")
+    swe_bench_data = load_from_disk(args.dataset)[args.split]
     existing_instance_ids = (
         load_existing_instance_ids(args.output_file) if args.skip_existing else set()
     )
@@ -430,7 +430,7 @@ def localize_irrelevant(args):
 
 
 def localize(args):
-    swe_bench_data = load_dataset(args.dataset, split="test")
+    swe_bench_data = load_from_disk(args.dataset)[args.split]
     start_file_locs = load_jsonl(args.start_file) if args.start_file else None
     existing_instance_ids = (
         load_existing_instance_ids(args.output_file) if args.skip_existing else set()
@@ -572,12 +572,6 @@ def main():
         "--model",
         type=str,
         default="gpt-4o-2024-05-13",
-        choices=[
-            "gpt-4o-2024-05-13",
-            "deepseek-coder",
-            "gpt-4o-mini-2024-07-18",
-            "claude-3-5-sonnet-20241022",
-        ],
     )
     parser.add_argument(
         "--backend",
@@ -589,8 +583,13 @@ def main():
         "--dataset",
         type=str,
         default="princeton-nlp/SWE-bench_Lite",
-        choices=["princeton-nlp/SWE-bench_Lite", "princeton-nlp/SWE-bench_Verified"],
-        help="Current supported dataset for evaluation",
+        help="Dataset path or HuggingFace name",
+    )
+    parser.add_argument(
+        "--split",
+        type=str,
+        default="test",
+        help="Dataset split: test or dev",
     )
 
     args = parser.parse_args()
