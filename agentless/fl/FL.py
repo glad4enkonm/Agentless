@@ -234,7 +234,10 @@ Return just the locations wrapped with ```.
         **kwargs,
     ):
         super().__init__(instance_id, structure, problem_statement)
-        self.max_tokens = 300
+        # Raised from 300 for thinking-capable local models (gemma):
+        # thinking shares the max_tokens budget, so 300 truncated every
+        # call into empty content and empty found_files.
+        self.max_tokens = 2048
         self.model_name = model_name
         self.backend = backend
         self.logger = logger

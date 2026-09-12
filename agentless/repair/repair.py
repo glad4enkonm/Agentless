@@ -405,7 +405,9 @@ def process_loc(loc, args, swe_bench_data, prev_o, write_lock=None):
         model=args.model,
         logger=logger,
         backend=args.backend,
-        max_tokens=1024,
+        # 1024 -> 8192: thinking-capable local models (gemma) spend part of
+        # the budget on reasoning; 1024 truncated into empty patches.
+        max_tokens=8192,
         temperature=0,
         batch_size=1,
     )
@@ -441,7 +443,7 @@ def process_loc(loc, args, swe_bench_data, prev_o, write_lock=None):
         model=args.model,
         logger=logger,
         backend=args.backend,
-        max_tokens=1024,
+        max_tokens=8192,
         temperature=0.8,
         batch_size=args.max_samples - 1,  # minus the 1 greedy sample
     )
