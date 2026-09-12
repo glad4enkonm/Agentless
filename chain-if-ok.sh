@@ -74,8 +74,10 @@ log "launch: $LAUNCH"
 while still_running; do sleep "$INTERVAL"; done
 log "watched process gone"
 
-if ! bash -c "$CHECK" >> "$STATUS" 2>&1; then
-    log "CHECK FAILED (exit $?) -- launch skipped"
+bash -c "$CHECK" >> "$STATUS" 2>&1
+check_rc=$?
+if [ "$check_rc" -ne 0 ]; then
+    log "CHECK FAILED (exit $check_rc) -- launch skipped"
     exit 1
 fi
 log "check passed"
